@@ -1,5 +1,6 @@
 import sqlite3
-
+import os
+from .hashing import hashPassword, verifyPassword
 databaseLocation = "./mainDatabase.db"
 
 
@@ -14,7 +15,8 @@ def createDatabase():
         name TEXT NOT NULL,
         type TEXT NOT NULL,
         price_per_hour REAL NOT NULL,
-        availability INTEGER NOT NULL
+        availability INTEGER NOT NULL,
+        image_path TEXT
     )
     """)
 
@@ -34,47 +36,61 @@ def createDatabase():
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY,
-        username TEXT NOT NULL,
-        email TEXT NOT NULL,
-        password_hash TEXT NOT NULL
-    )
+    id INTEGER PRIMARY KEY,
+    username TEXT NOT NULL,
+    email TEXT NOT NULL,
+    password_hash TEXT NOT NULL,
+    is_admin INTEGER NOT NULL DEFAULT 0)
     """)
 
     connection.commit()
     connection.close()
 
-
-def createUser(username, email, passwordHash):
+def createUser(username, email, password):
     """Create a new user."""
+    password_hash = hashPassword(password)
     connection = sqlite3.connect(databaseLocation)
     cursor = connection.cursor()
 
+    # Check if any users exist in the database
     cursor.execute("""
-    INSERT INTO users (username, email, password_hash)
-    VALUES (?, ?, ?)
-    """, (username, email, passwordHash))
+    SELECT COUNT(*) FROM users
+    """)
+    count = cursor.fetchone()[0]
+
+    if count == 0:  # If no users exist, assign admin privileges
+        cursor.execute("""
+        INSERT INTO users (username, email, password_hash, is_admin)
+        VALUES (?, ?, ?, ?)
+        """, (username, email, password_hash, 1))  # 1 represents admin privilege
+    else:  # Otherwise, assign customer privileges
+        cursor.execute("""
+        INSERT INTO users (username, email, password_hash, is_admin)
+        VALUES (?, ?, ?, ?)
+        """, (username, email, password_hash, 0))  # 0 represents customer privilege
 
     connection.commit()
     connection.close()
+    
+    
 
-
-def checkLogin(username, passwordHash):
+def checkLogin(username, password):
     """Check if a user's login credentials are valid."""
     connection = sqlite3.connect(databaseLocation)
     cursor = connection.cursor()
 
     cursor.execute("""
-    SELECT * FROM users
-    WHERE username = ? AND password_hash = ?
-    """, (username, passwordHash))
+    SELECT password_hash FROM users
+    WHERE username = ?
+    """, (username,))
 
-    user = cursor.fetchone()
+    stored_hashed_password = cursor.fetchone()
+    if stored_hashed_password:
+        return verifyPassword(password, stored_hashed_password[0])
 
     connection.close()
 
-    return user is not None
-
+    return False
 
 def deleteUser(username):
     """Delete a user."""
@@ -89,29 +105,34 @@ def deleteUser(username):
     connection.commit()
     connection.close()
 
-def addBike(name, type, pricePerHour, availability):
+def addBike(name, type, pricePerHour, availability, image_path):
     """Add a new bike to the database."""
     connection = sqlite3.connect(databaseLocation)
     cursor = connection.cursor()
 
     cursor.execute("""
-    INSERT INTO bikes (name, type, price_per_hour, availability)
-    VALUES (?, ?, ?, ?)
-    """, (name, type, pricePerHour, availability))
+    INSERT INTO bikes (name, type, price_per_hour, availability, image_path)
+    VALUES (?, ?, ?, ?, ?)
+    """, (name, type, pricePerHour, availability, image_path))
 
     connection.commit()
     connection.close()
 
-
 def removeBike(bike_id):
-    """Remove a bike from the database."""
+    """Remove a bike from the database along with its image file."""
     connection = sqlite3.connect(databaseLocation)
     cursor = connection.cursor()
 
-    cursor.execute("""
-    DELETE FROM bikes
-    WHERE id = ?
-    """, (bike_id,))
+    # Get the image path of the bike
+    cursor.execute("SELECT image_path FROM bikes WHERE id = ?", (bike_id,))
+    image_path = cursor.fetchone()[0]
+
+    # Remove the image file if it exists
+    if image_path:
+        os.remove("src/static/uploads/"+image_path)
+
+    # Remove the bike from the database
+    cursor.execute("DELETE FROM bikes WHERE id = ?", (bike_id,))
 
     connection.commit()
     connection.close()
@@ -133,28 +154,67 @@ def printListBikes():
 
     connection.close()
 
-def addRental(bike_id, user_id, start_date, end_date, total_price):
-    """Add a new rental to the database."""
+def getListBikes():
+    """Get the list of bikes from the database."""
     connection = sqlite3.connect(databaseLocation)
     cursor = connection.cursor()
 
     cursor.execute("""
-    INSERT INTO rentals (bike_id, user_id, start_date, end_date, total_price)
-    VALUES (?, ?, ?, ?, ?)
-    """, (bike_id, user_id, start_date, end_date, total_price))
+    SELECT id, name, type, price_per_hour, availability, image_path FROM bikes
+    """)
 
-    connection.commit()
+    bikes = cursor.fetchall()
+
     connection.close()
 
-def removeRental(rental_id):
-    """Remove a rental from the database."""
+    return bikes
+    
+def getUserByUsername(username, password):
+    """Get user information by username."""
     connection = sqlite3.connect(databaseLocation)
     cursor = connection.cursor()
 
     cursor.execute("""
-    DELETE FROM rentals
+    SELECT id, username, email, password_hash, is_admin FROM users
+    WHERE username = ?
+    """, (username,))
+
+    user = cursor.fetchone()
+
+    connection.close()
+
+    if user:
+        return {
+            'id': user[0],
+            'username': user[1],
+            'email': user[2],
+            'password': user[3],
+            'is_admin': user[4]
+            
+        }
+    else:
+        return None
+    
+def getUserById(userId):
+    """Get user information by user ID."""
+    connection = sqlite3.connect(databaseLocation)
+    cursor = connection.cursor()
+
+    cursor.execute("""
+    SELECT id, username, email, password_hash, is_admin FROM users
     WHERE id = ?
-    """, (rental_id,))
+    """, (userId,))
 
-    connection.commit()
+    user = cursor.fetchone()
+
     connection.close()
+    if user:
+        return {
+            'id': user[0],
+            'username': user[1],
+            'email': user[2],
+            'password_hash': user[3],
+            'is_admin': user[4]
+        }
+    else:
+        return None
