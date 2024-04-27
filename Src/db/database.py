@@ -218,3 +218,48 @@ def getUserById(userId):
         }
     else:
         return None
+def getBikeById(bike_id):
+    """Get bike information by bike ID."""
+    connection = sqlite3.connect(databaseLocation)
+    cursor = connection.cursor()
+
+    cursor.execute("""
+    SELECT id, name, type, price_per_hour, availability, image_path FROM bikes
+    WHERE id = ?
+    """, (bike_id,))
+
+    bike = cursor.fetchone()
+
+    connection.close()
+
+    if bike:
+        return {
+            'id': bike[0],
+            'name': bike[1],
+            'type': bike[2],
+            'price_per_hour': bike[3],
+            'availability': bike[4],
+            'image_path': bike[5]
+        }
+    else:
+        return None
+
+def getAvailableBikeCount(bike_id):
+    """Get the count of available bikes by bike ID."""
+    connection = sqlite3.connect(databaseLocation)
+    cursor = connection.cursor()
+
+    cursor.execute("""
+    SELECT availability FROM bikes
+    WHERE id = ?
+    """, (bike_id,))
+
+    availability = cursor.fetchone()
+
+    connection.close()
+
+    if availability:
+        return availability[0]  # Return the count of available bikes
+    else:
+        return 0  # If bike does not exist, return 0
+

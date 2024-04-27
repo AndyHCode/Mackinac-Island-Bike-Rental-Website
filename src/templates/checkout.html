@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-4">
+    <h1>Checkout</h1>
+  {% if error %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+  {% endif %}
+    <div>
+        <h4>Items in Cart:</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Bike</th>
+                    <th scope="col">Price per Hour</th>
+                    <th scope="col">Hours</th>
+                    <th scope="col">Total Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart %}
+                <tr>
+                    <td>{{ item.bike.name }}</td>
+                    <td>${{ item.bike.price_per_hour }}</td>
+                    <td>{{ item.hours }}</td>
+                    <td>${{ item.total_price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div>
+        <h3>Total Price: ${{ total_price }}</h3>
+    </div>
+    <form action="{{ url_for('checkout') }}" method="post">
+        <!-- Credit card form fields -->
+        <div class="form-group">
+            <label for="card_number">Card Number</label>
+            <input type="text" class="form-control" id="card_number" name="card_number" required>
+        </div>
+        <div class="form-group">
+            <label for="expiry_date">Expiry Date</label>
+            <input type="text" class="form-control" id="expiry_date" name="expiry_date" required>
+        </div>
+        <div class="form-group">
+            <label for="cvv">CVV</label>
+            <input type="text" class="form-control" id="cvv" name="cvv" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Pay Now</button>
+    </form>
+</div>
+
+<!-- Bootstrap JS and jQuery (optional) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -67,7 +67,7 @@ instance/
 
 #database stuff:
 .db
-uploads/*
+src/static/uploads/*
 
 # Scrapy stuff:
 .scrapy
