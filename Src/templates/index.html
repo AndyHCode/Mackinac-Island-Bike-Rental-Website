@@ -6,6 +6,13 @@
     <title>Home</title>
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      .center-image {
+          display: block;
+          margin: auto;
+          width: 90%; /* Adjust the width as needed */
+      }
+  </style>
 </head>
 <body>
 
@@ -16,8 +23,8 @@
   </button>
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav ml-auto">
-      <li class="nav-item">
-        <a class="nav-link active" href="/">Home</a>
+      <li class="nav-item active">
+        <a class="nav-link" href="/">Home</a>
       </li>
       {% if current_user.is_authenticated %}
       <li class="nav-item">
@@ -25,6 +32,10 @@
       </li>
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+      </li>
+      </li>
+        <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('return_bike') }}">Return Bike</a>
       </li>
       {% else %}
       <li class="nav-item">
@@ -35,20 +46,26 @@
       </li>
       {% endif %}
       <li class="nav-item">
-        <a class="nav-link" href="/store">Store</a>
+        <a class="nav-link" href="{{ url_for('store') }}">Store</a>
       </li>
+      {% if current_user.is_authenticated %}
+        <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('view_cart') }}">Cart</a>
+      {% endif %}
     </ul>
   </div>
 </nav>
 
 <div class="container mt-4">
-  <h1>Welcome to Your App!</h1>
-  <p>This is the home page of your app. You can add more content here.</p>
+  <h1>Welcome to Mackinac Bike Rentals</h1>
+  <p>Explore our wide range of bikes available for rent and enjoy a ride around the beautiful Mackinac Island. 
+    We have bikes available for all types of ages ranging from kids to adults.
+    Sign up or log in to start renting today!</p>
+</div>
+  <div class="container text-center mt-4">
+    <img src="static/frontPageImage.jpg" alt="Centered Image" class="center-image">
 </div>
 
-<!-- Bootstrap JS and jQuery (optional) -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </body>
 </html>

@@ -11,13 +11,13 @@
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" required><br><br>
         
-        <label for="type">Type:</label>
+        <label for="type">Description:</label>
         <input type="text" id="type" name="type" required><br><br>
         
         <label for="price_per_hour">Price per Hour:</label>
         <input type="number" id="price_per_hour" name="price_per_hour" required><br><br>
         
-        <label for="availability">Availability:</label>
+        <label for="availability">Inventory:</label>
         <input type="number" id="availability" name="availability" required><br><br>
 
         <label for="image">Image:</label>
@@ -29,7 +29,7 @@
     <h2>Current Bikes</h2>
     <ul>
         {% for bike in bikes %}
-            <li>{{ bike[1] }} - {{ bike[2] }} - ${{ bike[3] }} per hour - Availability: {{ bike[4] }}
+            <li>{{ bike[1] }} - {{ bike[2] }} - ${{ '%.2f' | format(bike[3]) }} per hour - inventory: {{ bike[4] }}
                 <form method="post" action="/remove_bike/{{ bike[0] }}">
                     <button type="submit">Remove</button>
                 </form>
@@ -37,5 +37,10 @@
             </li>
         {% endfor %}
     </ul>
+    <h2>Money Made</h2>
+    <p>Total money made: ${{ '%.2f' | format(total_earnings) }}</p>
+    <form method="post" action="/clear_earnings">
+        <button type="submit">Clear Amount</button>
+    </form>
 </body>
 </html>

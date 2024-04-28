@@ -31,16 +31,16 @@
                 {% for item in cart %}
                 <tr>
                     <td>{{ item.bike.name }}</td>
-                    <td>${{ item.bike.price_per_hour }}</td>
+                    <td>${{ '%.2f' | format(item.bike.price_per_hour) }}</td>
                     <td>{{ item.hours }}</td>
-                    <td>${{ item.total_price }}</td>
+                    <td>${{ '%.2f' | format(item.total_price) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     <div>
-        <h3>Total Price: ${{ total_price }}</h3>
+        <h3>Total Price: ${{ '%.2f' | format(total_price) }}</h3>
     </div>
     <form action="{{ url_for('checkout') }}" method="post">
         <!-- Credit card form fields -->
@@ -52,7 +52,7 @@
             <label for="expiry_date">Expiry Date</label>
             <input type="text" class="form-control" id="expiry_date" name="expiry_date" required>
         </div>
-        <div class="form-group">
+        <div class="form-group>
             <label for="cvv">CVV</label>
             <input type="text" class="form-control" id="cvv" name="cvv" required>
         </div>
@@ -60,9 +60,5 @@
     </form>
 </div>
 
-<!-- Bootstrap JS and jQuery (optional) -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
